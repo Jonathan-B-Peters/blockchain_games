@@ -54,7 +54,9 @@ describe("Test Decline Challenge", () => {
     //Get signers and contract and create challenge prior to running each tests
     beforeEach(async () => {
         [owner, addr1, addr2] = await ethers.getSigners();
-        Challenge = await deployContract("Challenge", ['0x0000000000000000000000000000000000000000']);
+        //Challenge constructor depends on an existing Game contract
+        const Game = await deployContract("Game");
+        Challenge = await deployContract("Challenge", [Game.address]);
         await Challenge.CreateChallenge(addr1.address);
     });
     it("DeclineChallenge should burn the token", async () => {
@@ -76,5 +78,29 @@ describe("Test Decline Challenge", () => {
         await expect(Challenge.connect(addr2).DeclineChallenge(0)).to.be.rejectedWith(Error);
         //Owner balance should be the same
         expect(await Challenge.balanceOf(owner.address)).to.equal(ownerBalance);
+    });
+});
+
+describe("Test Accept Challenge", () => {
+    //Signers and contract
+    let owner, addr1, addr2, Game, Challenge;
+    //Get signers and contract and create challenge prior to running each tests
+    beforeEach(async () => {
+        [owner, addr1, addr2] = await ethers.getSigners();
+        //Challenge constructor depends on an existing Game contract
+        Game = await deployContract("Game");
+        Challenge = await deployContract("Challenge", [Game.address]);
+        //Create a challenge prior to each test
+        await Challenge.CreateChallenge(addr1.address);
+    });
+    it("AcceptChallenge should mint a Game token and burn a Challenge Token", async () => {
+        //Get initial add1 game balance and owner challenge balance
+        const addr1GameBalance = await Game.balanceOf(addr1.address);
+        const ownerChallengeBalance = await Challenge.balanceOf(owner.address);
+        //Addr1 approves the challenge
+        await Challenge.connect(addr1).AcceptChallenge(0);
+        //Verify that the addr1 game balance has increased and the owner challenge balance has decreased
+        expect(await Game.balanceOf(addr1.address)).to.equal(addr1GameBalance + 1);
+        expect(await Challenge.balanceOf(owner.address)).to.equal(ownerChallengeBalance - 1);
     });
 });

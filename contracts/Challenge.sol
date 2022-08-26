@@ -3,15 +3,16 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "./Game.sol";
 
 contract Challenge is ERC721 {
 
     uint256 public nextTokenId;
 
-    address private gameContract;
+    Game private gameContract;
 
     constructor(address _gameContract) ERC721("Challenge", "CHAL") {
-        gameContract = _gameContract;
+        gameContract = Game(_gameContract);
     }
 
     function CreateChallenge(address to) external {
@@ -29,7 +30,8 @@ contract Challenge is ERC721 {
     }
 
     function AcceptChallenge(uint256 tokenId) external {
-        require(msg.sender == ownerOf(tokenId) || msg.sender == getApproved(tokenId), "Challenge: must be owner or operator to decline challenge");
-
+        require(msg.sender == getApproved(tokenId), "Challenge: must be operator to accept challenge");
+        gameContract.CreateGame(msg.sender, ownerOf(tokenId));
+        _burn(tokenId);
     }
 }
