@@ -32,7 +32,7 @@ describe("Test Challenge Creation", () => {
         //Get owner balance before creating challenge
         const ownerBalance = await Challenge.balanceOf(owner.address);
         //Contract call to create the challenge
-        await Challenge.CreateChallenge(addr1.address);
+        await Challenge.CreateChallenge(addr1.address, 0);
         //Owner balance should have increased by 1
         expect(await Challenge.balanceOf(owner.address)).to.equal(ownerBalance + 1);
         //'to' address should have been made an approver
@@ -53,9 +53,19 @@ describe("Test Decline Challenge", () => {
         //Challenge constructor depends on an existing Game contract
         const Game = await Utils.DeployContract("Game");
         Challenge = await Utils.DeployContract("Challenge", [Game.address]);
-        await Challenge.CreateChallenge(addr1.address);
+        await Challenge.CreateChallenge(addr1.address, 0);
     });
-    it("DeclineChallenge should burn the token", async () => {
+    it("DeclineChallenge should burn the token if challenger declines", async () => {
+        //Get owner balance before declining challenge
+        const ownerBalance = await Challenge.balanceOf(owner.address);
+        //This test depends on the owner having a token to burn
+        expect(ownerBalance).to.be.greaterThan(0);
+        //Contract call to decline the challenge
+        await Challenge.DeclineChallenge(0);
+        //Owner balance should have decreased by 1
+        expect(await Challenge.balanceOf(owner.address)).to.equal(ownerBalance - 1);
+    });
+    it("DeclineChallenge should burn the token if challenged declines", async () => {
         //Get owner balance before declining challenge
         const ownerBalance = await Challenge.balanceOf(owner.address);
         //This test depends on the owner having a token to burn
@@ -87,9 +97,9 @@ describe("Test Accept Challenge", () => {
         Game = await Utils.DeployContract("Game");
         Challenge = await Utils.DeployContract("Challenge", [Game.address]);
         //Create a challenge prior to each test
-        await Challenge.CreateChallenge(addr1.address);
+        await Challenge.CreateChallenge(addr1.address, 0);
     });
-    it("AcceptChallenge should mint a Game token and burn a Challenge Token", async () => {
+    it("AcceptChallenge should mint a Game token and burn a Challenge token", async () => {
         //Get initial add1 game balance and owner challenge balance
         const addr1GameBalance = await Game.balanceOf(addr1.address);
         const ownerChallengeBalance = await Challenge.balanceOf(owner.address);
@@ -99,6 +109,14 @@ describe("Test Accept Challenge", () => {
         expect(await Game.balanceOf(addr1.address)).to.equal(addr1GameBalance + 1);
         expect(await Challenge.balanceOf(owner.address)).to.equal(ownerChallengeBalance - 1);
     });
+    it("AcceptChallenge should fail if the challenger attempts to approve", async () => {
+        //Accept challenge is expected to fail because only the challenged party can accept
+        await expect(Challenge.AcceptChallenge(0)).to.be.rejectedWith(Error);
+    });
+    it("AcceptChallenge should fail if an uninvolved user attempts to approve", async () => {
+        //Accept challenge is expected to fail because only the challenged party can accept
+        await expect(Challenge.connect(addr2).AcceptChallenge(0)).to.be.rejectedWith(Error);
+    })
     it("AcceptChallenge should fail if challenge has expired", async () => {
         //Fast-forward network time by 24 hours
         await ethers.provider.send("evm_increaseTime", [60*60*24]);
