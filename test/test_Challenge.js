@@ -43,6 +43,8 @@ describe("Test Challenge Creation", () => {
         expect(await Challenge.balanceOf(owner.address)).to.equal(ownerBalance + 1);
         //'to' address should have been made an approver
         expect(await Challenge.getApproved(nextTokenId)).to.equal(addr1.address);
+        //token timestamp should match current block timestamp
+        expect(await Challenge.GetTimestamp(nextTokenId)).to.equal((await ethers.provider.getBlock("latest")).timestamp);
         //Next token id should have increase by 1
         expect(await Challenge.nextTokenId()).to.equal(nextTokenId + 1);
     });
@@ -102,5 +104,11 @@ describe("Test Accept Challenge", () => {
         //Verify that the addr1 game balance has increased and the owner challenge balance has decreased
         expect(await Game.balanceOf(addr1.address)).to.equal(addr1GameBalance + 1);
         expect(await Challenge.balanceOf(owner.address)).to.equal(ownerChallengeBalance - 1);
+    });
+    it("AcceptChallenge should fail if challenge has expired", async () => {
+        //Fast-forward network time by 24 hours
+        await ethers.provider.send("evm_increaseTime", [60*60*24]);
+        //Accept challenge is expected to fail because 24 hours has passed
+        await expect(Challenge.connect(addr1).AcceptChallenge(0)).to.be.rejectedWith(Error);
     });
 });
