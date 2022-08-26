@@ -8,7 +8,11 @@ contract Challenge is ERC721 {
 
     uint256 public nextTokenId;
 
-    constructor() ERC721("Challenge", "CHAL") {}
+    address private gameContract;
+
+    constructor(address _gameContract) ERC721("Challenge", "CHAL") {
+        gameContract = _gameContract;
+    }
 
     function CreateChallenge(address to) external {
         //Mint a new token for the challenger
@@ -22,5 +26,10 @@ contract Challenge is ERC721 {
     function DeclineChallenge(uint256 tokenId) external {
         require(msg.sender == ownerOf(tokenId) || msg.sender == getApproved(tokenId), "Challenge: must be owner or operator to decline challenge");
         _burn(tokenId);
+    }
+
+    function AcceptChallenge(uint256 tokenId) external {
+        require(msg.sender == ownerOf(tokenId) || msg.sender == getApproved(tokenId), "Challenge: must be owner or operator to decline challenge");
+
     }
 }
