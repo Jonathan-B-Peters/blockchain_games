@@ -1,19 +1,13 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-
-//Utility function to deploy a contract
-async function deployContract(name, args = []) {
-    const factory = await ethers.getContractFactory(name);
-    const contract = await factory.deploy(...args);
-    return contract;
-};
+const Utils = require("./utils.js");
 
 describe("Test Challenge Contract Deployment", () => {
     //Deploy contract and verify nextTokenId initialization
     it("Deployment should initialize nextTokenId, name, and symbol", async () => {
         //Challenge constructor depends on an existing Game contract
-        const Game = await deployContract("Game");
-        const Challenge = await deployContract("Challenge", [Game.address]);
+        const Game = await Utils.DeployContract("Game");
+        const Challenge = await Utils.DeployContract("Challenge", [Game.address]);
         //Verify initialization of contract parameters
         expect(await Challenge.name()).to.equal("Challenge");
         expect(await Challenge.symbol()).to.equal("CHAL");
@@ -28,8 +22,8 @@ describe("Test Challenge Creation", () => {
     before(async () => {
         [owner, addr1] = await ethers.getSigners();
         //Challenge constructor depends on an existing Game contract
-        const Game = await deployContract("Game");
-        Challenge = await deployContract("Challenge", [Game.address]);
+        const Game = await Utils.DeployContract("Game");
+        Challenge = await Utils.DeployContract("Challenge", [Game.address]);
     });
     //Create a challenge and verify that owner and operator are both updated
     it("CreateChallenge should mint a new token", async () => {
@@ -57,8 +51,8 @@ describe("Test Decline Challenge", () => {
     beforeEach(async () => {
         [owner, addr1, addr2] = await ethers.getSigners();
         //Challenge constructor depends on an existing Game contract
-        const Game = await deployContract("Game");
-        Challenge = await deployContract("Challenge", [Game.address]);
+        const Game = await Utils.DeployContract("Game");
+        Challenge = await Utils.DeployContract("Challenge", [Game.address]);
         await Challenge.CreateChallenge(addr1.address);
     });
     it("DeclineChallenge should burn the token", async () => {
@@ -90,8 +84,8 @@ describe("Test Accept Challenge", () => {
     beforeEach(async () => {
         [owner, addr1, addr2] = await ethers.getSigners();
         //Challenge constructor depends on an existing Game contract
-        Game = await deployContract("Game");
-        Challenge = await deployContract("Challenge", [Game.address]);
+        Game = await Utils.DeployContract("Game");
+        Challenge = await Utils.DeployContract("Challenge", [Game.address]);
         //Create a challenge prior to each test
         await Challenge.CreateChallenge(addr1.address);
     });
