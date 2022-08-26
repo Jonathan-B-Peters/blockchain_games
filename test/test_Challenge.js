@@ -1,19 +1,13 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-
-//Utility function to deploy a contract
-async function deployContract(name, args = []) {
-    const factory = await ethers.getContractFactory(name);
-    const contract = await factory.deploy(...args);
-    return contract;
-};
+const Utils = require("./utils.js");
 
 describe("Test Challenge Contract Deployment", () => {
     //Deploy contract and verify nextTokenId initialization
     it("Deployment should initialize nextTokenId, name, and symbol", async () => {
         //Challenge constructor depends on an existing Game contract
-        const Game = await deployContract("Game");
-        const Challenge = await deployContract("Challenge", [Game.address]);
+        const Game = await Utils.DeployContract("Game");
+        const Challenge = await Utils.DeployContract("Challenge", [Game.address]);
         //Verify initialization of contract parameters
         expect(await Challenge.name()).to.equal("Challenge");
         expect(await Challenge.symbol()).to.equal("CHAL");
@@ -28,8 +22,8 @@ describe("Test Challenge Creation", () => {
     before(async () => {
         [owner, addr1] = await ethers.getSigners();
         //Challenge constructor depends on an existing Game contract
-        const Game = await deployContract("Game");
-        Challenge = await deployContract("Challenge", [Game.address]);
+        const Game = await Utils.DeployContract("Game");
+        Challenge = await Utils.DeployContract("Challenge", [Game.address]);
     });
     //Create a challenge and verify that owner and operator are both updated
     it("CreateChallenge should mint a new token", async () => {
@@ -43,6 +37,8 @@ describe("Test Challenge Creation", () => {
         expect(await Challenge.balanceOf(owner.address)).to.equal(ownerBalance + 1);
         //'to' address should have been made an approver
         expect(await Challenge.getApproved(nextTokenId)).to.equal(addr1.address);
+        //token timestamp should match current block timestamp
+        expect(await Challenge.GetTimestamp(nextTokenId)).to.equal((await ethers.provider.getBlock("latest")).timestamp);
         //Next token id should have increase by 1
         expect(await Challenge.nextTokenId()).to.equal(nextTokenId + 1);
     });
@@ -54,7 +50,9 @@ describe("Test Decline Challenge", () => {
     //Get signers and contract and create challenge prior to running each tests
     beforeEach(async () => {
         [owner, addr1, addr2] = await ethers.getSigners();
-        Challenge = await deployContract("Challenge", ['0x0000000000000000000000000000000000000000']);
+        //Challenge constructor depends on an existing Game contract
+        const Game = await Utils.DeployContract("Game");
+        Challenge = await Utils.DeployContract("Challenge", [Game.address]);
         await Challenge.CreateChallenge(addr1.address);
     });
     it("DeclineChallenge should burn the token", async () => {
@@ -76,5 +74,35 @@ describe("Test Decline Challenge", () => {
         await expect(Challenge.connect(addr2).DeclineChallenge(0)).to.be.rejectedWith(Error);
         //Owner balance should be the same
         expect(await Challenge.balanceOf(owner.address)).to.equal(ownerBalance);
+    });
+});
+
+describe("Test Accept Challenge", () => {
+    //Signers and contract
+    let owner, addr1, addr2, Game, Challenge;
+    //Get signers and contract and create challenge prior to running each tests
+    beforeEach(async () => {
+        [owner, addr1, addr2] = await ethers.getSigners();
+        //Challenge constructor depends on an existing Game contract
+        Game = await Utils.DeployContract("Game");
+        Challenge = await Utils.DeployContract("Challenge", [Game.address]);
+        //Create a challenge prior to each test
+        await Challenge.CreateChallenge(addr1.address);
+    });
+    it("AcceptChallenge should mint a Game token and burn a Challenge Token", async () => {
+        //Get initial add1 game balance and owner challenge balance
+        const addr1GameBalance = await Game.balanceOf(addr1.address);
+        const ownerChallengeBalance = await Challenge.balanceOf(owner.address);
+        //Addr1 approves the challenge
+        await Challenge.connect(addr1).AcceptChallenge(0);
+        //Verify that the addr1 game balance has increased and the owner challenge balance has decreased
+        expect(await Game.balanceOf(addr1.address)).to.equal(addr1GameBalance + 1);
+        expect(await Challenge.balanceOf(owner.address)).to.equal(ownerChallengeBalance - 1);
+    });
+    it("AcceptChallenge should fail if challenge has expired", async () => {
+        //Fast-forward network time by 24 hours
+        await ethers.provider.send("evm_increaseTime", [60*60*24]);
+        //Accept challenge is expected to fail because 24 hours has passed
+        await expect(Challenge.connect(addr1).AcceptChallenge(0)).to.be.rejectedWith(Error);
     });
 });
