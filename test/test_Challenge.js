@@ -2,25 +2,29 @@ const { id } = require("@ethersproject/hash");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("Test Challenge token contract", () => {
+describe("Test Challenge Contract Deployment", () => {
+    //Deploy contract and verify nextTokenId initialization
+    it("Deployment should initialize nextTokenId, name, and symbol", async () => {
+        const [owner, addr1, addr2] = await ethers.getSigners();
+        const Challenge = await ethers.getContractFactory("Challenge");
+        const hardhatChallenge = await Challenge.deploy();
+        expect(await hardhatChallenge.nextTokenId()).to.equal(0);
+        expect(await hardhatChallenge.name()).to.equal("Challenge");
+        expect(await hardhatChallenge.symbol()).to.equal("CHAL");
+    });
+});
+
+describe("Test Challenge Creation", () => {
 
     //Signers and contract factory
-    let owner, addr1, addr2, Challenge;
+    let owner, addr1, addr2, Challenge, hardhatChallenge;
 
     //Get signers and contract factory prior to running tests
     before(async () => {
         [owner, addr1, addr2] = await ethers.getSigners();
         Challenge = await ethers.getContractFactory("Challenge");
-    })
-
-    //Deployed contract
-    let hardhatChallenge;
-
-    //Deploy contract and verify nextTokenId initialization
-    it("Deployment should initialize name and symbol", async () => {
         hardhatChallenge = await Challenge.deploy();
-        expect(await hardhatChallenge.nextTokenId()).to.equal(0);
-    });
+    })
 
     //Create a challenge and verify that owner and operator are both updated
     it("CreateChallenge should mint a new token", async () => {
