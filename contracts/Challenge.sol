@@ -17,7 +17,13 @@ contract Challenge is ERC721 {
         gameContract = Game(_gameContract);
     }
 
-    function CreateChallenge(address to) external {
+    //TODO: What if someone challenges the same user twice?
+    // What if someone challenges many many people?
+    // Should this contract only allow one challenge per user per game type?
+    // Either make the contract enumerable (will have to eventually anyway) and loop over and check user's outstanding challenges
+    // Or... Create a new mapping of address => challengeData, where challengeData is mapping of gameType to bool.
+    function CreateChallenge(address to, uint256 wager) external {
+        require(msg.sender.balance > wager, "Challenge: insufficient balance");
         //Mark creation timestamp for this token
         timestamps[nextTokenId] = block.timestamp;
         //Mint a new token for the challenger
