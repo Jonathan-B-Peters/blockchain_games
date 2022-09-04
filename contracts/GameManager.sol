@@ -38,7 +38,10 @@ contract GameManager {
 
     function CreateChallenge(address to, GameType gameType) external payable {
         //Verify challenger does not have an outstanding challenge for this game
-        require(outgoingChallenges[msg.sender][gameType] == 0, "GameManager: only one outstanding challenge per game is allowed at one time");
+        require(
+            outgoingChallenges[msg.sender][gameType] == 0,
+            "GameManager: only one outstanding challenge per game is allowed at one time"
+        );
         //Create the new challenge
         challenges[nextChallengeId] = Challenge(msg.sender, to, gameType, msg.value);
         //Update challenger outgoing challenge data
@@ -54,7 +57,10 @@ contract GameManager {
     }
 
     function DeclineChallenge(uint256 challengeId) external {
-        require(msg.sender == challenges[challengeId].from || msg.sender == challenges[challengeId].to, "Only an involved party can decline a challenge");
+        require(
+            msg.sender == challenges[challengeId].from || msg.sender == challenges[challengeId].to,
+            "Only an involved party can decline a challenge"
+        );
         uint256 wager = challenges[challengeId].wager;
         address from = challenges[challengeId].from;
         DeleteChallenge(challengeId);
@@ -68,8 +74,10 @@ contract GameManager {
 
         //Use swap and pop to remove from challenged partys list of incoming challenges
         address to = challenges[challengeId].to;
+        uint256 index = incomingChallengesIndex[challengeId];
+        uint lastIndex = incomingChallengeBalances[to] - 1;
         //Swap
-        incomingChallenges[to][incomingChallengesIndex[challengeId]] = incomingChallenges[to][incomingChallengeBalances[to] - 1];
+        incomingChallenges[to][index] = incomingChallenges[to][lastIndex];
         //Pop
         delete incomingChallenges[to][incomingChallengeBalances[to] - 1];
         //Decrement incoming challenge balance of challenged party

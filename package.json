@@ -4,14 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "npx solhint ./contracts/*.sol",
+    "test": "npx hardhat test",
+    "coverage": "npx hardhat coverage"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.1",
     "coveralls": "^3.1.1",
-    "hardhat": "^2.10.2"
+    "hardhat": "^2.10.2",
+    "solhint": "^3.3.7"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3"
