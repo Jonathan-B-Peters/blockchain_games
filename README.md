@@ -1,6 +1,8 @@
 # Blockchain Games
 
 [![Build Status](https://app.travis-ci.com/Jonathan-B-Peters/blockchain_games.svg?token=tdEabTLD8uvJAQBpwTu9&branch=main)](https://app.travis-ci.com/Jonathan-B-Peters/blockchain_games)
+[![Coveralls](https://img.shields.io/coveralls/github/Jonathan-B-Peters/blockchain_games)](https://coveralls.io/github/Jonathan-B-Peters/blockchain_games)
+[![issues](https://img.shields.io/github/issues/Jonathan-B-Peters/blockchain_games)](https://github.com/Jonathan-B-Peters/blockchain_games/issues)
 
 ## Objective
 
