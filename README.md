@@ -3,6 +3,8 @@
 [![Build Status](https://app.travis-ci.com/Jonathan-B-Peters/blockchain_games.svg?token=tdEabTLD8uvJAQBpwTu9&branch=main)](https://app.travis-ci.com/Jonathan-B-Peters/blockchain_games)
 [![Coveralls](https://img.shields.io/coveralls/github/Jonathan-B-Peters/blockchain_games)](https://coveralls.io/github/Jonathan-B-Peters/blockchain_games)
 [![issues](https://img.shields.io/github/issues/Jonathan-B-Peters/blockchain_games)](https://github.com/Jonathan-B-Peters/blockchain_games/issues)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/Jonathan-B-Peters/blockchain_games)
+![GitHub package.json version](https://img.shields.io/github/package-json/v/Jonathan-B-Peters/blockchain_games)
 ![GitHub](https://img.shields.io/github/license/Jonathan-B-Peters/blockchain_games)
 
 ## Objective
