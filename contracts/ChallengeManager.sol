@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 
 import "hardhat/console.sol";
 
-contract GameManager {
+contract ChallengeManager {
     //All possible game types. These games are not yet implemented
     enum GameType {
         TicTacToe,
