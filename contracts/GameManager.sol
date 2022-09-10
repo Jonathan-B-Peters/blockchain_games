@@ -6,6 +6,8 @@ import "hardhat/console.sol";
 
 contract GameManager {
 
+    mapping(address => bool) admins;
+
     struct Game {
         address player1;
         address player2;
@@ -13,5 +15,11 @@ contract GameManager {
         uint256 wager;
     }
 
-    constructor() {}
+    constructor(address _admin) {
+        admins[_admin] = true;
+    }
+
+    function CreateGame() {
+        require(admins[msg.sender], "Only approved addresses can create games.");
+    }
 }
