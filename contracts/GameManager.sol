@@ -19,7 +19,7 @@ contract GameManager {
         admins[_admin] = true;
     }
 
-    function CreateGame() {
+    function CreateGame() public {
         require(admins[msg.sender], "Only approved addresses can create games.");
     }
 }
