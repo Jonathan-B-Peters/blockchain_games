@@ -19,7 +19,12 @@ contract GameManager {
         admins[_admin] = true;
     }
 
+    function SetAdmin(address admin, bool val) public {
+        require(admins[msg.sender], "Only admins can set admins.");
+        admins[admin] = val;
+    }
+
     function CreateGame() public {
-        require(admins[msg.sender], "Only approved addresses can create games.");
+        require(admins[msg.sender], "Only admins can create games.");
     }
 }
