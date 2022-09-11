@@ -24,4 +24,16 @@ describe("Test Create Game", () => {
         //Create the game
         await expect(GameManager.connect(addr1).CreateGame(owner.address, addr1.address, ChallengeManager.address, { value: 100 })).to.be.rejectedWith(Error);
     });
-});
+    it("SetAdmin should update admin privelages", async () => {
+        //addr1 should not have privelages initially
+        expect(await GameManager.admins(addr1.address)).to.equal(false);
+        //Grant privelages to addr1
+        await GameManager.SetAdmin(addr1.address, true);
+        //addr1 should now have privelages
+        expect(await GameManager.admins(addr1.address)).to.equal(true);
+        //Revoke privelages from addr1
+        await GameManager.SetAdmin(addr1.address, false);
+        //addr1 should no longer have privelages
+        expect(await GameManager.admins(addr1.address)).to.equal(false);
+    });
+});;

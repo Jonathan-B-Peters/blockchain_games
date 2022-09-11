@@ -15,7 +15,7 @@ contract GameManager {
     }
 
     //Portions of this contract are restricted to only admins
-    mapping(address => bool) admins;
+    mapping(address => bool) public admins;
 
     uint256 nextGameId;
     mapping(uint256 => Game) public games;
