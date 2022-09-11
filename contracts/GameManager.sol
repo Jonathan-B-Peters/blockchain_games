@@ -8,6 +8,9 @@ contract GameManager {
 
     mapping(address => bool) admins;
 
+    uint256 nextGameId = 1;
+    mapping(uint256 => Game) public games;
+
     struct Game {
         address player1;
         address player2;
@@ -19,12 +22,13 @@ contract GameManager {
         admins[_admin] = true;
     }
 
-    function SetAdmin(address admin, bool val) public {
-        require(admins[msg.sender], "Only admins can set admins.");
+    function SetAdmin(address admin, bool val) external {
+        require(admins[msg.sender], "GameManager: Only admins can set admins.");
         admins[admin] = val;
     }
 
-    function CreateGame() public {
-        require(admins[msg.sender], "Only admins can create games.");
+    function CreateGame(address player1, address player2, address gameContract, uint256 wager) external {
+        require(admins[msg.sender], "GameManager: Only admins can create games.");
+        games[nextGameId] = Game(player1, player2, gameContract, wager);
     }
 }
