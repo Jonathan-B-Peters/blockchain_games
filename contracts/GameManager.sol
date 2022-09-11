@@ -6,11 +6,7 @@ import "hardhat/console.sol";
 
 contract GameManager {
 
-    mapping(address => bool) admins;
-
-    uint256 nextGameId = 1;
-    mapping(uint256 => Game) public games;
-
+    //All data necessary for an existing game
     struct Game {
         address player1;
         address player2;
@@ -18,17 +14,27 @@ contract GameManager {
         uint256 wager;
     }
 
+    //Portions of this contract are restricted to only admins
+    mapping(address => bool) admins;
+
+    uint256 nextGameId;
+    mapping(uint256 => Game) public games;
+
+    //Sets an intial admin
     constructor(address _admin) {
         admins[_admin] = true;
     }
 
+    //Adds or removes an admin
     function SetAdmin(address admin, bool val) external {
-        require(admins[msg.sender], "GameManager: Only admins can set admins.");
+        require(admins[msg.sender], "GameManager: Only admins can set admins");
         admins[admin] = val;
     }
 
-    function CreateGame(address player1, address player2, address gameContract, uint256 wager) external {
-        require(admins[msg.sender], "GameManager: Only admins can create games.");
+    //Creates a new game. This function is intended to only be called the ChallengeManager contract
+    function CreateGame(address player1, address player2, address gameContract, uint256 wager) external payable {
+        require(admins[msg.sender], "GameManager: Only admins can create games");
+        require(msg.value >= wager * 2, "GameManager: Insufficient funds provided to create a game");
         games[nextGameId] = Game(player1, player2, gameContract, wager);
     }
 }

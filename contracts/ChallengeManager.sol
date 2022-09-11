@@ -22,6 +22,7 @@ contract ChallengeManager {
 
     //CHALLENGE DATA STRUCTURES
 
+    //This value starts at 1, because 0 indicates that the challenge does not exist in other data structures
     uint256 nextChallengeId = 1;
     //Mapping of challengeId => challenge
     mapping(uint256 => Challenge) public challenges;
