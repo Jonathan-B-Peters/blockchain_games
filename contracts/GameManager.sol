@@ -32,9 +32,8 @@ contract GameManager {
     }
 
     //Creates a new game. This function is intended to only be called the ChallengeManager contract
-    function CreateGame(address player1, address player2, address gameContract, uint256 wager) external payable {
+    function CreateGame(address player1, address player2, address gameContract) external payable {
         require(admins[msg.sender], "GameManager: Only admins can create games");
-        require(msg.value >= wager * 2, "GameManager: Insufficient funds provided to create a game");
-        games[nextGameId] = Game(player1, player2, gameContract, wager);
+        games[nextGameId] = Game(player1, player2, gameContract, msg.value);
     }
 }
