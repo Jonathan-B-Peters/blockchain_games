@@ -22,6 +22,7 @@ contract ChallengeManager {
 
     //CHALLENGE DATA STRUCTURES
 
+    //This value starts at 1, because 0 indicates that the challenge does not exist in other data structures
     uint256 nextChallengeId = 1;
     //Mapping of challengeId => challenge
     mapping(uint256 => Challenge) public challenges;
@@ -34,13 +35,14 @@ contract ChallengeManager {
     //Mapping of users to the total number of incoming challenges for that user
     mapping(address => uint256) public incomingChallengeBalances;
 
+    //Currently no initial parameters for the contract
     constructor() {}
 
     function CreateChallenge(address to, GameType gameType) external payable {
         //Verify challenger does not have an outstanding challenge for this game
         require(
             outgoingChallenges[msg.sender][gameType] == 0,
-            "GameManager: only one outstanding challenge per game is allowed at one time"
+            "ChallengeManager: only one outstanding challenge per game is allowed at one time"
         );
         //Create the new challenge
         challenges[nextChallengeId] = Challenge(msg.sender, to, gameType, msg.value);
@@ -57,18 +59,23 @@ contract ChallengeManager {
     }
 
     function DeclineChallenge(uint256 challengeId) external {
+        //Only the challenger or challenged can decline the challenge
         require(
             msg.sender == challenges[challengeId].from || msg.sender == challenges[challengeId].to,
-            "Only an involved party can decline a challenge"
+            "ChallengeManager: Only an involved party can decline a challenge"
         );
+        //Get the wager and 'from' address from the challenge to be deleted
         uint256 wager = challenges[challengeId].wager;
         address from = challenges[challengeId].from;
-        DeleteChallenge(challengeId);
+        //Private function, removes and updated data structures
+        deleteChallenge(challengeId);
+        //Replay the initial wager to the challenger
         (bool sent, bytes memory data) = from.call{value: wager}("");
-        require(sent, "Failed to send Ether");
+        //If failed to repay, revert the transaction
+        require(sent, "ChallengeManager: Failed to send Ether");
     }
 
-    function DeleteChallenge(uint256 challengeId) private {
+    function deleteChallenge(uint256 challengeId) private {
         //Delete from the challenger's outgoing challenges
         delete(outgoingChallenges[challenges[challengeId].from][challenges[challengeId].gameType]);
 
