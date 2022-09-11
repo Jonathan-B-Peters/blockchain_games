@@ -18,4 +18,10 @@ describe("Test Create Game", () => {
         //Wager should be equal to value sent during game creation
         expect((await GameManager.games(0)).wager).to.equal(100);
     });
+    it("CreateGame should fail for non admin", async () => {
+        //Game with id 0 should not exist, so expect wager to be 0
+        expect((await GameManager.games(0)).wager).to.equal(0);
+        //Create the game
+        await expect(GameManager.connect(addr1).CreateGame(owner.address, addr1.address, ChallengeManager.address, { value: 100 })).to.be.rejectedWith(Error);
+    });
 });
