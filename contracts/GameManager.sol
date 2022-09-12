@@ -3,6 +3,7 @@
 pragma solidity ^0.8.9;
 
 import "hardhat/console.sol";
+import "./mocks/mock_Game.sol";
 
 contract GameManager {
 
@@ -38,9 +39,9 @@ contract GameManager {
         games[nextGameId] = Game(player1, player2, gameContract, "0", msg.value);
     }
 
-    function TakeTurn(uint256 gameId) external {
+    function TakeTurn(uint256 gameId) external returns (bytes memory){
         validatePlayer(msg.sender, gameId);
-        //TODO: call mock game contract
+        return mock_Game(games[gameId].gameContract).TakeTurn("0");
     }
 
     function validatePlayer(address player, uint256 gameId) private view {
