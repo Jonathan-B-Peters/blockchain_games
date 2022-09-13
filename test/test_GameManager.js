@@ -28,8 +28,11 @@ describe("Test Create Game", () => {
     it("TakeTurn should return '0'", async () => {
         //Create a game for the test to use
         await GameManager.CreateGame(owner.address, addr1.address, mock_Game.address, { value: 100 });
-        //Returned game state should be '0' since using mock
+        //Returned game state should still be empty bytes since using mock
         expect((await GameManager.TakeTurn(0)).value).to.equal("0");
+    });
+    it("TakeTurn should fail for a game id that does not exist", async () => {
+        await expect(GameManager.TakeTurn(0)).to.be.rejectedWith(Error);
     });
     it("SetAdmin should update admin privelages", async () => {
         //addr1 should not have privelages initially
