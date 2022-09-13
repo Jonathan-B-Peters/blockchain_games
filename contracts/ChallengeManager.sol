@@ -60,10 +60,7 @@ contract ChallengeManager {
 
     function DeclineChallenge(uint256 challengeId) external {
         //Only the challenger or challenged can decline the challenge
-        require(
-            msg.sender == challenges[challengeId].from || msg.sender == challenges[challengeId].to,
-            "ChallengeManager: Only an involved party can decline a challenge"
-        );
+        validateUser(msg.sender, challengeId);
         //Get the wager and 'from' address from the challenge to be deleted
         uint256 wager = challenges[challengeId].wager;
         address from = challenges[challengeId].from;
@@ -73,6 +70,10 @@ contract ChallengeManager {
         (bool sent, bytes memory data) = from.call{value: wager}("");
         //If failed to repay, revert the transaction
         require(sent, "ChallengeManager: Failed to send Ether");
+    }
+
+    function AcceptChallenge(uint256 challengeId) external {
+        validateUser(msg.sender, challengeId);
     }
 
     function deleteChallenge(uint256 challengeId) private {
@@ -94,5 +95,12 @@ contract ChallengeManager {
         delete(incomingChallengesIndex[challengeId]);
         //Delete the challenge
         delete(challenges[challengeId]);
+    }
+
+    function validateUser(address user, uint256 challengeId) private view {
+        require(
+            msg.sender == challenges[challengeId].from || msg.sender == challenges[challengeId].to,
+            "ChallengeManager: Invalid user address"
+        );
     }
 }
