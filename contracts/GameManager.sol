@@ -36,10 +36,11 @@ contract GameManager {
     //Creates a new game. This function is intended to only be called the ChallengeManager contract
     function CreateGame(address player1, address player2, address gameContract) external payable {
         require(admins[msg.sender], "GameManager: Only admins can create games");
-        games[nextGameId] = Game(player1, player2, gameContract, "0", msg.value);
+        games[nextGameId] = Game(player1, player2, gameContract, "", msg.value);
     }
 
     function TakeTurn(uint256 gameId) external returns (bytes memory){
+        validateId(gameId);
         validatePlayer(msg.sender, gameId);
         return mock_Game(games[gameId].gameContract).TakeTurn("0");
     }
@@ -49,6 +50,13 @@ contract GameManager {
             player == games[gameId].player1 ||
             player == games[gameId].player2,
             "GameContract: Invalid player address"
+        );
+    }
+
+    function validateId(uint256 gameId) private view {
+        require(
+            games[gameId].gameContract != address(0),
+            "GameManager: Invalid game id"
         );
     }
 }
